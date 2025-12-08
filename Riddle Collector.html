@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riddle Collector | Smooth Scroll</title>
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Roboto','Helvetica Neue',Arial,sans-serif;}
+    body {background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+    .container {width:100%;max-width:800px;background:white;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.2);display:flex;flex-direction:column;max-height:90vh;}
+    .header {background: linear-gradient(135deg,#2c3e50 0%,#4a6491 100%);color:white;padding:24px 32px;text-align:center;}
+    .header h1 {font-size:28px;font-weight:600;margin-bottom:8px;}
+    .controls {padding:16px 20px;background:#f8f9fa;border-bottom:1px solid #e9ecef;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+    .button {padding:12px 24px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;min-width:120px;justify-content:center;transition:all 0.3s ease;}
+    .button-primary {background:#4CAF50;color:white;}
+    .button-primary:hover {background:#3d8b40;transform:translateY(-2px);}
+    .button-danger {background:#ff4757;color:white;}
+    .button-danger:hover {transform:translateY(-2px);}
+    .button-success {background:#2196F3;color:white;}
+    .button-success:hover {transform:translateY(-2px);}
+    .stats {display:flex;gap:20px;justify-content:center;padding:12px;background:#f8f9fa;border-bottom:1px solid #e9ecef;flex-wrap:wrap;}
+    .stat-item {text-align:center;padding:8px 16px;background:white;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);min-width:100px;}
+    .stat-value {font-size:24px;font-weight:700;color:#2c3e50;}
+    .stat-label {font-size:12px;color:#6c757d;margin-top:4px;text-transform:uppercase;}
+    .content {flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .list-container {flex:1;overflow-y:auto;position:relative;padding:10px 0;}
+    #riddlesList {list-style:none;padding:0;margin:0;}
+    #riddlesList li {padding:16px 20px;border-bottom:1px solid #e9ecef;font-size:16px;line-height:1.6;position:relative;}
+    #riddlesList li:hover {background-color:#f8f9fa;}
+    #riddlesList li:nth-child(even) {background-color:#fafafa;}
+    .empty-state {display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#6c757d;text-align:center;}
+    .notification {position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:16px 24px;border-radius:8px;display:none;align-items:center;gap:12px;z-index:1000;}
+    .notification.error {background:#ff4757;}
+    .footer {padding:14px 20px;text-align:center;background:#f8f9fa;border-top:1px solid #e9ecef;font-size:13px;color:#6c757d;}
+    .status-indicator {display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;background:#dc3545;}
+    .status-indicator.active {background:#4CAF50;animation:pulse 2s infinite;}
+    @keyframes pulse {0%,100%{opacity:1;}50%{opacity:0.5;}}
+    @media (max-width:768px){.container{margin:10px;}.header{padding:16px;}.header h1{font-size:24px;}.controls{flex-direction:column;padding:12px;}.button{width:100%;}}
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📚 Riddle Collector</h1>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Total Riddles</div></div>
+    <div class="stat-item"><div class="stat-value" id="speedValue">1/s</div><div class="stat-label">Speed</div></div>
+    <div class="stat-item"><div class="stat-value" id="uniqueCount">0</div><div class="stat-label">Unique Riddles</div></div>
+  </div>
+
+  <div class="controls">
+    <button id="toggleBtn" class="button button-primary">
+      <span class="status-indicator"></span>
+      <span>Start Collection</span>
+    </button>
+    <button id="clearBtn" class="button button-danger">🗑️ Clear All</button>
+    <button id="copyBtn" class="button button-success">📋 Copy All</button>
+  </div>
+
+  <div class="content">
+    <div class="list-container">
+      <ul id="riddlesList"></ul>
+      <div id="emptyState" class="empty-state">
+        <div class="empty-state-text">No riddles collected yet. Click "Start Collection" to begin!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">⚡ Auto-collecting unique riddles in real time.</div>
+</div>
+
+<div id="notification" class="notification"><span id="notificationText">Copied!</span></div>
+
+<script>
+const riddlesAPI = "https://riddles-api.vercel.app/random";
+const riddlesList = document.getElementById("riddlesList");
+const toggleBtn = document.getElementById("toggleBtn");
+const clearBtn = document.getElementById("clearBtn");
+const copyBtn = document.getElementById("copyBtn");
+const emptyState = document.getElementById("emptyState");
+const notification = document.getElementById("notification");
+const notificationText = document.getElementById("notificationText");
+const totalCountEl = document.getElementById("totalCount");
+const uniqueCountEl = document.getElementById("uniqueCount");
+const speedValueEl = document.getElementById("speedValue");
+
+let intervalId = null;
+let speed = 1;  
+let intervalMs = 1000 / speed;
+let allRiddles = new Set();
+let totalRequests = 0;
+
+function updateStats(){
+  totalCountEl.textContent = totalRequests;
+  uniqueCountEl.textContent = allRiddles.size;
+  speedValueEl.textContent = `${speed}/s`;
+}
+
+function showNotification(message, isError=false){
+  notificationText.textContent = message;
+  notification.className = isError ? 'notification error' : 'notification';
+  notification.style.display = 'flex';
+  setTimeout(()=> notification.style.display='none',3000);
+}
+
+function updateEmptyState(){
+  emptyState.style.display = allRiddles.size === 0 ? 'flex' : 'none';
+}
+
+async function addRiddle(){
+  try{
+    totalRequests++;
+    const res = await fetch(riddlesAPI);
+    if(!res.ok) throw new Error('API error');
+    const data = await res.json();
+
+    const riddle = data?.riddle;
+    const answer = data?.answer;
+
+    if(!riddle || !answer) throw new Error("Invalid data");
+
+    const key = riddle + "|" + answer;
+
+    if(!allRiddles.has(key)){
+      allRiddles.add(key);
+
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <div style="display:flex; gap:20px; width:100%;">
+            <div style="width:60%; font-weight:600;">${riddle}</div>
+            <div style="width:40%; color:#2c3e50;">${answer}</div>
+        </div>
+      `;
+      riddlesList.appendChild(li);
+
+      riddlesList.scrollTo({
+        top: riddlesList.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+
+    updateStats();
+    updateEmptyState();
+
+  }catch(err){
+    console.error(err);
+    showNotification("Failed to fetch riddle!", true);
+  }
+}
+
+toggleBtn.onclick = () => {
+  if(!intervalId){
+    addRiddle();
+    intervalId = setInterval(addRiddle, intervalMs);
+    toggleBtn.innerHTML = '<span class="status-indicator active"></span><span>Stop Collection</span>';
+    toggleBtn.className='button button-danger';
+  } else {
+    clearInterval(intervalId);
+    intervalId = null;
+    toggleBtn.innerHTML = '<span class="status-indicator"></span><span>Start Collection</span>';
+    toggleBtn.className='button button-primary';
+  }
+};
+
+clearBtn.onclick = () => {
+  if(allRiddles.size === 0) return;
+  riddlesList.innerHTML = '';
+  allRiddles.clear();
+  totalRequests = 0;
+  updateStats();
+  updateEmptyState();
+};
+
+copyBtn.onclick = () => {
+  const all = Array.from(riddlesList.children)
+    .map(li => {
+        const cols = li.querySelectorAll("div > div");
+        const r = cols[0]?.innerText || "";
+        const a = cols[1]?.innerText || "";
+        return r + "\t" + a;
+    })
+    .join("\n");
+
+  if(all){
+    navigator.clipboard.writeText(all);
+    const old=copyBtn.textContent;
+    copyBtn.textContent="✓ Copied";
+    copyBtn.disabled=true;
+    setTimeout(()=>{copyBtn.textContent=old; copyBtn.disabled=false;},1500);
+  } else {
+    showNotification("No riddles to copy!", true);
+  }
+};
+
+updateEmptyState();
+</script>
+
+</body>
+</html>
