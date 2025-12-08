@@ -64,13 +64,7 @@
   .status-indicator{
     width:12px;height:12px;border-radius:50%;background:#dc3545
   }
-  .active{background:#4caf50;animation:pulse 1.8s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-  @media(max-width:768px){
-    .button{width:100%}
-  }
-
-  /* Scroll to Top button inside content */
+   /* Scroll to Top button inside content */
   #scrollTopBtn {
     position:absolute; /* content-এর ভিতরে overlay */
     bottom:10px;
@@ -89,6 +83,11 @@
     z-index:10;
     display:none; /* scroll অনুযায়ী দেখানো হবে */
     box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  }
+  .active{background:#4caf50;animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  @media(max-width:768px){
+    .button{width:100%}
   }
 </style>
 </head>
@@ -245,3 +244,4 @@ toggleEmpty();
 </script>
 </body>
 </html>
+
