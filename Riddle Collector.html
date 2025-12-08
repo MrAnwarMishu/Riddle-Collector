@@ -1,202 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riddle Collector | Smooth Scroll</title>
-  <style>
-    * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Roboto','Helvetica Neue',Arial,sans-serif;}
-    body {background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
-    .container {width:100%;max-width:800px;background:white;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.2);display:flex;flex-direction:column;max-height:90vh;}
-    .header {background: linear-gradient(135deg,#2c3e50 0%,#4a6491 100%);color:white;padding:24px 32px;text-align:center;}
-    .header h1 {font-size:28px;font-weight:600;margin-bottom:8px;}
-    .controls {padding:16px 20px;background:#f8f9fa;border-bottom:1px solid #e9ecef;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
-    .button {padding:12px 24px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;min-width:120px;justify-content:center;transition:all 0.3s ease;}
-    .button-primary {background:#4CAF50;color:white;}
-    .button-primary:hover {background:#3d8b40;transform:translateY(-2px);}
-    .button-danger {background:#ff4757;color:white;}
-    .button-danger:hover {transform:translateY(-2px);}
-    .button-success {background:#2196F3;color:white;}
-    .button-success:hover {transform:translateY(-2px);}
-    .stats {display:flex;gap:20px;justify-content:center;padding:12px;background:#f8f9fa;border-bottom:1px solid #e9ecef;flex-wrap:wrap;}
-    .stat-item {text-align:center;padding:8px 16px;background:white;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);min-width:100px;}
-    .stat-value {font-size:24px;font-weight:700;color:#2c3e50;}
-    .stat-label {font-size:12px;color:#6c757d;margin-top:4px;text-transform:uppercase;}
-    .content {flex:1;display:flex;flex-direction:column;overflow:hidden;}
-    .list-container {flex:1;overflow-y:auto;position:relative;padding:10px 0;}
-    #riddlesList {list-style:none;padding:0;margin:0;}
-    #riddlesList li {padding:16px 20px;border-bottom:1px solid #e9ecef;font-size:16px;line-height:1.6;position:relative;}
-    #riddlesList li:hover {background-color:#f8f9fa;}
-    #riddlesList li:nth-child(even) {background-color:#fafafa;}
-    .empty-state {display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#6c757d;text-align:center;}
-    .notification {position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:16px 24px;border-radius:8px;display:none;align-items:center;gap:12px;z-index:1000;}
-    .notification.error {background:#ff4757;}
-    .footer {padding:14px 20px;text-align:center;background:#f8f9fa;border-top:1px solid #e9ecef;font-size:13px;color:#6c757d;}
-    .status-indicator {display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;background:#dc3545;}
-    .status-indicator.active {background:#4CAF50;animation:pulse 2s infinite;}
-    @keyframes pulse {0%,100%{opacity:1;}50%{opacity:0.5;}}
-    @media (max-width:768px){.container{margin:10px;}.header{padding:16px;}.header h1{font-size:24px;}.controls{flex-direction:column;padding:12px;}.button{width:100%;}}
-  </style>
-</head>
-<body>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Riddle Collector</title>
 
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial}
+  body{
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px
+  }
+  .container{
+    width:100%;max-width:800px;background:#fff;border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;flex-direction:column;max-height:90vh
+  }
+  .header{background:linear-gradient(135deg,#2c3e50,#4a6491);color:#fff;padding:24px;text-align:center}
+  .stats,.controls,.footer{
+    background:#f8f9fa;border-color:#e9ecef
+  }
+  .stats,.controls{
+    display:flex;justify-content:center;flex-wrap:wrap;gap:12px;padding:12px
+  }
+  .stat-item{
+    text-align:center;background:#fff;border-radius:8px;
+    padding:8px 16px;box-shadow:0 2px 4px rgba(0,0,0,.1);min-width:100px
+  }
+  .stat-value{font-size:22px;font-weight:700;color:#2c3e50}
+  .stat-label{font-size:12px;color:#6c757d;text-transform:uppercase}
+  .button{
+    padding:12px 20px;border:0;border-radius:8px;font-weight:600;
+    cursor:pointer;display:flex;align-items:center;gap:8px;min-width:120px;justify-content:center;
+    transition:.2s
+  }
+  .button-primary{background:#4caf50;color:#fff}
+  .button-danger{background:#ff4757;color:#fff}
+  .button-success{background:#2196f3;color:#fff}
+  .button:hover{transform:translateY(-2px)}
+  .content{
+    flex:1;display:flex;flex-direction:column;overflow:hidden;
+    position:relative; /* scroll button overlay */
+  }
+  .list-container{
+    flex:1;overflow-y:auto;padding:10px 0;
+  }
+  #riddlesList li{
+    padding:16px 20px;border-bottom:1px solid #e9ecef;font-size:15px;line-height:1.5
+  }
+  #riddlesList li:nth-child(even){background:#fafafa}
+  #riddlesList li:hover{background:#f8f9fa}
+  .empty-state{
+    height:100%;display:flex;align-items:center;justify-content:center;
+    color:#6c757d;text-align:center;padding:20px
+  }
+  .notification{
+    position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;
+    padding:14px 20px;border-radius:8px;display:none;z-index:999
+  }
+  .error{background:#ff4757}
+  .footer{
+    padding:12px;text-align:center;font-size:13px;color:#6c757d;border-top:1px solid #e9ecef
+  }
+  .status-indicator{
+    width:12px;height:12px;border-radius:50%;background:#dc3545
+  }
+  .active{background:#4caf50;animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  @media(max-width:768px){
+    .button{width:100%}
+  }
+
+  /* Scroll to Top button inside content */
+  #scrollTopBtn {
+    position:absolute; /* content-এর ভিতরে overlay */
+    bottom:10px;
+    right:10px;
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:50%;
+    background:#2196f3;
+    color:#fff;
+    font-size:20px;
+    cursor:pointer;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:10;
+    display:none; /* scroll অনুযায়ী দেখানো হবে */
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+
+<body>
 <div class="container">
-  <div class="header">
-    <h1>📚 Riddle Collector</h1>
-  </div>
+  <div class="header"><h1>📚 Riddle Collector</h1></div>
 
   <div class="stats">
-    <div class="stat-item"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Total Riddles</div></div>
-    <div class="stat-item"><div class="stat-value" id="speedValue">1/s</div><div class="stat-label">Speed</div></div>
-    <div class="stat-item"><div class="stat-value" id="uniqueCount">0</div><div class="stat-label">Unique Riddles</div></div>
+    <div class="stat-item"><div id="totalCount" class="stat-value">0</div><div class="stat-label">Total</div></div>
+    <div class="stat-item"><div id="speedValue" class="stat-value">1/s</div><div class="stat-label">Speed</div></div>
+    <div class="stat-item"><div id="uniqueCount" class="stat-value">0</div><div class="stat-label">Unique</div></div>
   </div>
 
   <div class="controls">
     <button id="toggleBtn" class="button button-primary">
-      <span class="status-indicator"></span>
-      <span>Start Collection</span>
+      <span class="status-indicator"></span><span>Start Collection</span>
     </button>
-    <button id="clearBtn" class="button button-danger">🗑️ Clear All</button>
-    <button id="copyBtn" class="button button-success">📋 Copy All</button>
+    <button id="clearBtn" class="button button-danger">🗑️ Clear</button>
+    <button id="copyBtn" class="button button-success">📋 Copy</button>
   </div>
 
   <div class="content">
     <div class="list-container">
       <ul id="riddlesList"></ul>
-      <div id="emptyState" class="empty-state">
-        <div class="empty-state-text">No riddles collected yet. Click "Start Collection" to begin!</div>
-      </div>
+      <div id="emptyState" class="empty-state">No riddles yet. Click Start!</div>
     </div>
+
+    <!-- Scroll to Top Button inside content -->
+    <button id="scrollTopBtn">↑</button>
   </div>
 
-  <div class="footer">⚡ Auto-collecting unique riddles in real time.</div>
+  <div class="footer">⚡ Collecting unique riddles in real-time</div>
 </div>
 
+<!-- Notification -->
 <div id="notification" class="notification"><span id="notificationText">Copied!</span></div>
 
 <script>
-const riddlesAPI = "https://riddles-api.vercel.app/random";
-const riddlesList = document.getElementById("riddlesList");
-const toggleBtn = document.getElementById("toggleBtn");
-const clearBtn = document.getElementById("clearBtn");
-const copyBtn = document.getElementById("copyBtn");
-const emptyState = document.getElementById("emptyState");
-const notification = document.getElementById("notification");
-const notificationText = document.getElementById("notificationText");
-const totalCountEl = document.getElementById("totalCount");
-const uniqueCountEl = document.getElementById("uniqueCount");
-const speedValueEl = document.getElementById("speedValue");
+const api="https://riddles-api.vercel.app/random";
+const $=id=>document.getElementById(id);
+const list=$("riddlesList"), empty=$("emptyState");
+const listContainer = document.querySelector('.list-container');
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+const notify=$("notification"), txt=$("notificationText");
+const totalEl=$("totalCount"), uniqEl=$("uniqueCount"), speedEl=$("speedValue");
 
-let intervalId = null;
-let speed = 1;  
-let intervalMs = 1000 / speed;
-let allRiddles = new Set();
-let totalRequests = 0;
+let timer=null, speed=1, all=new Set(), total=0, autoScroll=true;
 
-function updateStats(){
-  totalCountEl.textContent = totalRequests;
-  uniqueCountEl.textContent = allRiddles.size;
-  speedValueEl.textContent = `${speed}/s`;
+function stats(){ totalEl.textContent=total; uniqEl.textContent=all.size; speedEl.textContent=`${speed}/s`; }
+function toast(m,err=false){ txt.textContent=m; notify.className=err?"notification error":"notification"; notify.style.display="block"; setTimeout(()=>notify.style.display="none",2000) }
+function toggleEmpty(){ empty.style.display=all.size?"none":"flex" }
+
+function scrollToBottom() {
+  if (!autoScroll) return;
+  const target = listContainer.scrollHeight;
+  const start = listContainer.scrollTop;
+  const distance = target - start;
+  const duration = 300;
+  const startTime = performance.now();
+
+  function animate(time) {
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 0.5 - Math.cos(progress * Math.PI) / 2;
+    listContainer.scrollTop = start + distance * ease;
+    if (progress < 1) requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
 }
 
-function showNotification(message, isError=false){
-  notificationText.textContent = message;
-  notification.className = isError ? 'notification error' : 'notification';
-  notification.style.display = 'flex';
-  setTimeout(()=> notification.style.display='none',3000);
-}
-
-function updateEmptyState(){
-  emptyState.style.display = allRiddles.size === 0 ? 'flex' : 'none';
-}
-
-async function addRiddle(){
+async function fetchRiddle(){
   try{
-    totalRequests++;
-    const res = await fetch(riddlesAPI);
-    if(!res.ok) throw new Error('API error');
-    const data = await res.json();
+    total++;
+    const {riddle,answer}=await fetch(api).then(r=>r.json());
+    if(!riddle||!answer) throw 0;
+    const key=riddle+"|"+answer;
 
-    const riddle = data?.riddle;
-    const answer = data?.answer;
-
-    if(!riddle || !answer) throw new Error("Invalid data");
-
-    const key = riddle + "|" + answer;
-
-    if(!allRiddles.has(key)){
-      allRiddles.add(key);
-
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <div style="display:flex; gap:20px; width:100%;">
-            <div style="width:60%; font-weight:600;">${riddle}</div>
-            <div style="width:40%; color:#2c3e50;">${answer}</div>
-        </div>
-      `;
-      riddlesList.appendChild(li);
-
-      riddlesList.scrollTo({
-        top: riddlesList.scrollHeight,
-        behavior: 'smooth'
-      });
+    if(!all.has(key)){
+      all.add(key);
+      list.insertAdjacentHTML("beforeend",
+        `<li><div style="display:flex;gap:20px">
+           <div style="width:60%;font-weight:600">${riddle}</div>
+           <div style="width:40%">${answer}</div>
+         </div></li>`
+      );
+      scrollToBottom();
     }
-
-    updateStats();
-    updateEmptyState();
-
-  }catch(err){
-    console.error(err);
-    showNotification("Failed to fetch riddle!", true);
-  }
+    stats(); toggleEmpty();
+  }catch{ toast("Failed!",true) }
 }
 
-toggleBtn.onclick = () => {
-  if(!intervalId){
-    addRiddle();
-    intervalId = setInterval(addRiddle, intervalMs);
-    toggleBtn.innerHTML = '<span class="status-indicator active"></span><span>Stop Collection</span>';
-    toggleBtn.className='button button-danger';
+$("toggleBtn").onclick=()=>{
+  if(timer){
+    clearInterval(timer); timer=null;
+    toggleBtn.innerHTML=`<span class="status-indicator"></span><span>Start Collection</span>`;
+    toggleBtn.className="button button-primary";
   } else {
-    clearInterval(intervalId);
-    intervalId = null;
-    toggleBtn.innerHTML = '<span class="status-indicator"></span><span>Start Collection</span>';
-    toggleBtn.className='button button-primary';
+    fetchRiddle();
+    timer=setInterval(fetchRiddle,1000/speed);
+    toggleBtn.innerHTML=`<span class="status-indicator active"></span><span>Stop Collection</span>`;
+    toggleBtn.className="button button-danger";
   }
 };
 
-clearBtn.onclick = () => {
-  if(allRiddles.size === 0) return;
-  riddlesList.innerHTML = '';
-  allRiddles.clear();
-  totalRequests = 0;
-  updateStats();
-  updateEmptyState();
+$("clearBtn").onclick=()=>{
+  list.innerHTML=""; all.clear(); total=0;
+  stats(); toggleEmpty();
 };
 
-copyBtn.onclick = () => {
-  const all = Array.from(riddlesList.children)
-    .map(li => {
-        const cols = li.querySelectorAll("div > div");
-        const r = cols[0]?.innerText || "";
-        const a = cols[1]?.innerText || "";
-        return r + "\t" + a;
-    })
+$("copyBtn").onclick=()=>{
+  const text=[...list.children]
+    .map(li=>[...li.querySelectorAll("div>div")].map(t=>t.innerText).join("\t"))
     .join("\n");
 
-  if(all){
-    navigator.clipboard.writeText(all);
-    const old=copyBtn.textContent;
-    copyBtn.textContent="✓ Copied";
-    copyBtn.disabled=true;
-    setTimeout(()=>{copyBtn.textContent=old; copyBtn.disabled=false;},1500);
-  } else {
-    showNotification("No riddles to copy!", true);
-  }
+  if(!text) return toast("Nothing to copy!",true);
+
+  navigator.clipboard.writeText(text);
+  const old=copyBtn.textContent;
+  copyBtn.textContent="✓ Copied"; copyBtn.disabled=true;
+  setTimeout(()=>{copyBtn.textContent=old;copyBtn.disabled=false},1000);
 };
 
-updateEmptyState();
-</script>
+// Scroll to Top button: visibility & click
+scrollTopBtn.style.display = "none";
 
+listContainer.addEventListener("scroll", ()=>{
+  if(listContainer.scrollTop > 50){
+    scrollTopBtn.style.display = "flex";
+  } else {
+    scrollTopBtn.style.display = "none";
+  }
+});
+
+scrollTopBtn.addEventListener("click", ()=>{
+  const start = listContainer.scrollTop;
+  const distance = -start;
+  const duration = 300;
+  const startTime = performance.now();
+
+  function animate(time) {
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 0.5 - Math.cos(progress * Math.PI) / 2;
+    listContainer.scrollTop = start + distance * ease;
+    if (progress < 1) requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+});
+
+toggleEmpty();
+</script>
 </body>
 </html>
