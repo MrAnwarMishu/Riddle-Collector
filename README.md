@@ -1,2 +1,3 @@
-https://icanhazdadjoke.com
-https://official-joke-api.appspot.com/random_joke
+https://icanhazdadjoke.com,
+https://official-joke-api.appspot.com/random_joke,
+
