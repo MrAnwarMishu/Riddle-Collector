@@ -3,206 +3,366 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Riddle Collector</title>
+<title>Dad Joke Collector</title>
 
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial}
-  body{
-    background:linear-gradient(135deg,#667eea,#764ba2);
-    min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px
-  }
-  .container{
-    width:100%;max-width:800px;background:#fff;border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;flex-direction:column;max-height:90vh
-  }
-  .header{background:linear-gradient(135deg,#2c3e50,#4a6491);color:#fff;padding:24px;text-align:center}
-  .stats,.controls,.footer{
-    background:#f8f9fa;border-color:#e9ecef
-  }
-  .stats,.controls{
-    display:flex;justify-content:center;flex-wrap:wrap;gap:12px;padding:12px
-  }
-  .stat-item{
-    text-align:center;background:#fff;border-radius:8px;
-    padding:8px 16px;box-shadow:0 2px 4px rgba(0,0,0,.1);min-width:100px
-  }
-  .stat-value{font-size:22px;font-weight:700;color:#2c3e50}
-  .stat-label{font-size:12px;color:#6c757d;text-transform:uppercase}
-  .button{
-    padding:0 20px;
-    height:48px;
-    min-width:150px;
-    border:0;border-radius:8px;font-weight:600;
-    cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-    justify-content:center;transition:.2s;white-space:nowrap;
-  }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI',Roboto,Arial
+}
 
-  .button-primary{background:#4caf50;color:#fff}
-  .button-danger{background:#ff4757;color:#fff}
-  .button-success{background:#2196f3;color:#fff}
+body{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px
+}
 
-  .button:hover{transform:translateY(-2px)}
+.container{
+  width:100%;
+  max-width:800px;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  display:flex;
+  flex-direction:column;
+  max-height:90vh
+}
 
-  .content{
-    flex:1;display:flex;flex-direction:column;overflow:hidden;
-    position:relative;
-  }
-  .list-container{flex:1;overflow-y:auto;padding:10px 0}
-  #riddlesList li{
-    padding:16px 20px;border-bottom:1px solid #e9ecef;font-size:15px;line-height:1.5
-  }
-  #riddlesList li:nth-child(even){background:#fafafa}
-  #riddlesList li:hover{background:#f8f9fa}
+.header{
+  background:linear-gradient(135deg,#2c3e50,#4a6491);
+  color:#fff;
+  padding:24px;
+  text-align:center
+}
 
-  .empty-state{
-    height:100%;display:flex;align-items:center;justify-content:center;
-    color:#6c757d;text-align:center;padding:20px
-  }
+.stats,.controls,.footer{
+  background:#f8f9fa;
+}
 
-  .notification{
-    position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;
-    padding:14px 20px;border-radius:8px;display:none;z-index:999
-  }
-  .error{background:#ff4757}
+.stats,.controls{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:12px
+}
 
-  .footer{
-    padding:12px;text-align:center;font-size:13px;color:#6c757d;border-top:1px solid #e9ecef
-  }
+.stat-item{
+  text-align:center;
+  background:#fff;
+  border-radius:8px;
+  padding:8px 16px;
+  box-shadow:0 2px 4px rgba(0,0,0,.1);
+  min-width:100px
+}
 
-  .status-indicator{
-    width:12px;height:12px;border-radius:50%;background:#dc3545
-  }
-  #scrollTopBtn {
-    position:absolute;
-    bottom:10px; right:10px;
-    width:40px; height:40px;
-    border:none; border-radius:50%;
-    background:#2196f3; color:#fff;
-    font-size:20px; cursor:pointer;
-    display:none; justify-content:center; align-items:center;
-    box-shadow:0 2px 6px rgba(0,0,0,0.2);
-  }
+.stat-value{
+  font-size:22px;
+  font-weight:700;
+  color:#2c3e50
+}
 
-  .active{background:#4caf50;animation:pulse 1.8s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.stat-label{
+  font-size:12px;
+  color:#6c757d;
+  text-transform:uppercase
+}
 
+.button{
+  padding:0 20px;
+  height:48px;
+  min-width:150px;
+  border:0;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:.2s;
+  position:relative;
+  overflow:hidden
+}
+
+.button-primary{background:#4caf50;color:#fff}
+.button-danger{background:#ff4757;color:#fff}
+.button-success{background:#2196f3;color:#fff}
+
+.button:hover{
+  transform:translateY(-2px)
+}
+
+.button:active{
+  transform:scale(0.95)
+}
+
+/* Ripple */
+.button::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.35);
+  opacity:0;
+  transition:.3s
+}
+
+.button.ripple::after{
+  opacity:1
+}
+
+/* Shake (Clear) */
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-4px)}
+  50%{transform:translateX(4px)}
+  75%{transform:translateX(-4px)}
+}
+
+.button.shake{
+  animation:shake .3s
+}
+
+/* Copy success */
+.button.copied{
+  background:#2ecc71 !important;
+}
+
+.button.copied::after{
+  content:"✔ Copied!";
+  inset:0;
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#fff;
+  opacity:1
+}
+
+.content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative
+}
+
+.list-container{
+  flex:1;
+  overflow-y:auto;
+  padding:10px 0;
+}
+
+#jokesList li{
+  padding:16px 20px;
+  border-bottom:1px solid #e9ecef;
+  font-size:15px;
+  line-height:1.5
+}
+
+#jokesList li:nth-child(even){
+  background:#fafafa
+}
+
+.empty-state{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  color:#6c757d;
+  font-size:16px;
+  background:#fff;
+}
+
+.empty-state.error{
+  color:#ff4757;
+  font-weight:600
+}
+
+.footer{
+  padding:12px;
+  text-align:center;
+  font-size:13px;
+  color:#6c757d;
+  border-top:1px solid #e9ecef
+}
+
+.status-indicator{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#dc3545
+}
+
+.active{
+  background:#4caf50;
+  animation:pulse 1.8s infinite
+}
+
+@keyframes pulse{
+  0%,100%{opacity:1}
+  50%{opacity:.5}
+}
+
+#scrollTopBtn{
+  position:absolute;
+  bottom:10px;
+  right:10px;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#2196f3;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  display:none
+}
 </style>
 </head>
 
 <body>
 <div class="container">
-  <div class="header"><h1>📚 Riddle Collector</h1></div>
+
+  <div class="header">
+    <h1>😂 Dad Joke Collector</h1>
+  </div>
 
   <div class="stats">
-    <div class="stat-item"><div id="totalCount" class="stat-value">0</div><div class="stat-label">Total</div></div>
-    <div class="stat-item"><div id="speedValue" class="stat-value">1/s</div><div class="stat-label">Speed</div></div>
-    <div class="stat-item"><div id="uniqueCount" class="stat-value">0</div><div class="stat-label">Unique</div></div>
+    <div class="stat-item">
+      <div id="totalCount" class="stat-value">0</div>
+      <div class="stat-label">Fetched</div>
+    </div>
+    <div class="stat-item">
+      <div id="uniqueCount" class="stat-value">0</div>
+      <div class="stat-label">Unique</div>
+    </div>
   </div>
 
   <div class="controls">
     <button id="toggleBtn" class="button button-primary">
-      <span class="status-indicator"></span><span>Start Collection</span>
+      <span class="status-indicator"></span> Start
     </button>
-    <button id="clearBtn" class="button button-danger">🗑️ Clear</button>
+    <button id="clearBtn" class="button button-danger">🗑 Clear</button>
     <button id="copyBtn" class="button button-success">📋 Copy</button>
   </div>
 
   <div class="content">
     <div class="list-container">
-      <ul id="riddlesList"></ul>
-      <div id="emptyState" class="empty-state">No riddles yet. Click Start!</div>
+      <ul id="jokesList"></ul>
+
+      <div id="emptyState" class="empty-state">
+        No jokes yet. Click Start!
+      </div>
     </div>
 
     <button id="scrollTopBtn">↑</button>
   </div>
 
-  <div class="footer">⚡ Collecting unique riddles in real-time</div>
+  <div class="footer">⚡ Powered by icanhazdadjoke.com</div>
 </div>
 
-<div id="notification" class="notification"><span id="notificationText">Copied!</span></div>
-
 <script>
-const api="https://riddles-api.vercel.app/random";
-const $=id=>document.getElementById(id);
-const list=$("riddlesList"), empty=$("emptyState");
-const listContainer = document.querySelector('.list-container');
-const scrollTopBtn = document.getElementById('scrollTopBtn');
-const notify=$("notification"), txt=$("notificationText");
-const totalEl=$("totalCount"), uniqEl=$("uniqueCount"), speedEl=$("speedValue");
+const API_URL = "https://icanhazdadjoke.com/";
+const $ = id => document.getElementById(id);
 
-let timer=null, speed=1, all=new Set(), total=0, autoScroll=true;
+const list = $("jokesList");
+const empty = $("emptyState");
+const totalEl = $("totalCount");
+const uniqueEl = $("uniqueCount");
+const toggleBtn = $("toggleBtn");
+const clearBtn = $("clearBtn");
+const copyBtn = $("copyBtn");
+const scrollTopBtn = $("scrollTopBtn");
+const container = document.querySelector(".list-container");
 
-function stats(){ totalEl.textContent=total; uniqEl.textContent=all.size; speedEl.textContent=`${speed}/s`; }
-function toast(m,err=false){ txt.textContent=m; notify.className=err?"notification error":"notification"; notify.style.display="block"; setTimeout(()=>notify.style.display="none",2000) }
-function toggleEmpty(){ empty.style.display=all.size?"none":"flex" }
+let timer = null;
+let total = 0;
+let jokes = new Set();
 
-function scrollToBottom() {
-  if (!autoScroll) return;
-  listContainer.scrollTop = listContainer.scrollHeight;
+// Update stats
+function updateStats(){
+  totalEl.textContent = total;
+  uniqueEl.textContent = jokes.size;
 }
 
-async function fetchRiddle(){
+// Animate buttons
+function animate(btn, cls, time=300){
+  btn.classList.add("ripple", cls);
+  setTimeout(() => btn.classList.remove("ripple", cls), time);
+}
+
+// Fetch a dad joke
+async function fetchJoke(){
   try{
+    const res = await fetch(API_URL, {
+      headers: { Accept: "application/json" }
+    });
+    if(!res.ok) throw new Error(`API Error: ${res.status}`);
+    const data = await res.json();
     total++;
-    const {riddle,answer}=await fetch(api).then(r=>r.json());
-    if(!riddle||!answer) throw 0;
-
-    const key=riddle+"|"+answer;
-
-    if(!all.has(key)){
-      all.add(key);
-      list.insertAdjacentHTML("beforeend",
-        `<li><div style="display:flex;gap:20px">
-           <div style="width:60%;font-weight:600">${riddle}</div>
-           <div style="width:40%">${answer}</div>
-         </div></li>`
-      );
-      scrollToBottom();
+    if(!jokes.has(data.joke)){
+      jokes.add(data.joke);
+      list.insertAdjacentHTML("beforeend", `<li>${data.joke}</li>`);
+      container.scrollTop = container.scrollHeight;
     }
 
-    stats(); toggleEmpty();
-  }catch{ toast("Failed!",true) }
+    empty.style.display = jokes.size ? "none" : "flex";
+    updateStats();
+
+  }catch(err){
+    empty.textContent = "⚠️ API Error — retrying…";
+    empty.className = "empty-state error";
+    empty.style.display = "flex";
+    console.error(err);
+  }
 }
 
-$("toggleBtn").onclick=()=>{
+// Button actions
+toggleBtn.onclick = () => {
   if(timer){
-    clearInterval(timer); timer=null;
-    toggleBtn.innerHTML=`<span class="status-indicator"></span><span>Start Collection</span>`;
-    toggleBtn.className="button button-primary";
+    clearInterval(timer);
+    timer = null;
+    toggleBtn.innerHTML = `<span class="status-indicator"></span> Start`;
+    toggleBtn.className = "button button-primary";
   } else {
-    fetchRiddle();
-    timer=setInterval(fetchRiddle,1000/speed);
-    toggleBtn.innerHTML=`<span class="status-indicator active"></span><span>Stop Collection</span>`;
-    toggleBtn.className="button button-danger";
+    fetchJoke();
+    timer = setInterval(fetchJoke, 1500);
+    toggleBtn.innerHTML = `<span class="status-indicator active"></span> Stop`;
+    toggleBtn.className = "button button-danger";
   }
 };
 
-$("clearBtn").onclick=()=>{
-  list.innerHTML=""; all.clear(); total=0;
-  stats(); toggleEmpty();
+clearBtn.onclick = () => {
+  animate(clearBtn, "shake");
+  list.innerHTML = "";
+  jokes.clear();
+  total = 0;
+  updateStats();
+  empty.style.display = "flex";
+  empty.className = "empty-state";
+  empty.textContent = "No jokes yet. Click Start!";
 };
 
-$("copyBtn").onclick=()=>{
-  const text=[...list.children]
-    .map(li=>[...li.querySelectorAll("div>div")].map(t=>t.innerText).join("\t"))
-    .join("\n");
-
-  if(!text) return toast("Nothing to copy!",true);
-
-  navigator.clipboard.writeText(text);
-  const old=copyBtn.textContent;
-  copyBtn.textContent="✓ Copied"; copyBtn.disabled=true;
-  setTimeout(()=>{copyBtn.textContent=old;copyBtn.disabled=false},1000);
+copyBtn.onclick = () => {
+  if(!jokes.size) return;
+  navigator.clipboard.writeText([...jokes].join("\n"));
+  animate(copyBtn, "copied", 1200);
 };
 
-listContainer.addEventListener("scroll", ()=>{
-  scrollTopBtn.style.display = listContainer.scrollTop > 50 ? "flex" : "none";
+// Scroll-to-top
+container.addEventListener("scroll",()=>{
+  scrollTopBtn.style.display =
+    container.scrollTop > 50 ? "block" : "none";
 });
-
-scrollTopBtn.addEventListener("click", ()=> listContainer.scrollTop = 0);
-
-toggleEmpty();
+scrollTopBtn.onclick = () => container.scrollTop = 0;
 </script>
 </body>
 </html>
-
